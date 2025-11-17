@@ -1,0 +1,19 @@
+# core
+numpy==1.24.3
+opencv-python==4.7.0.72
+mediapipe==0.10.21
+imageio==2.37.0
+imageio-ffmpeg==0.4.8
+
+# ML
+torch==2.1.1
+torchvision==0.16.1
+scikit-learn==1.2.2
+
+# dev / helpers
+matplotlib==3.7.2
+tqdm==4.67.1
+pandas==2.2.2
+
+# optional TTS / later (ElevenLabs)
+elevenlabs==0.2.1
