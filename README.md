@@ -1,5 +1,6 @@
 # British Sign Language Translator
 
+> 🥇 1st Place in the Accelerate ME x Housr - Elevenlabs Challenge
 > 🤟 Real-Time Computer Vision & Sequence Learning Project  
 > ♿ Accessibility-Focused AI System for Gesture Understanding  
 
