@@ -21,7 +21,7 @@ idx_to_label = {int(k):v for k,v in label_map.items()}
 mp_holistic = mp.solutions.holistic
 
 # Load model
-dummy_input = torch.zeros((1, WINDOW_SIZE, 1662))  # adjust 1662 to keypoints size
+dummy_input = torch.zeros((1, WINDOW_SIZE, 1659))  # adjust 1662 to keypoints size
 input_size = dummy_input.size(2)
 num_classes = len(idx_to_label)
 model = GestureLSTM(input_size=input_size, num_classes=num_classes).to(DEVICE)
