@@ -1,4 +1,7 @@
-# src/camera_record.py
+
+# GESTURES = ["yes", "no", "sorry", "thank_you", "hello"]
+# REPS = 20
+
 import os
 import time
 import cv2
@@ -9,10 +12,8 @@ import mediapipe as mp
 
 mp_holistic = mp.solutions.holistic
 
-# GESTURES = ["yes", "no", "sorry", "thank_you", "hello"]
-# REPS = 20
-GESTURES = ["yes"]
-REPS = 1
+GESTURES = ["sorry"]
+REPS = 40
 DATA_DIR = "data/raw"
 
 def ensure_dir(path):
@@ -27,6 +28,11 @@ def countdown(frame, text="Get ready", seconds=3):
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (0,0,255), 3)
         cv2.imshow("Recording Gesture", display)
         cv2.waitKey(1000)
+
+# get next available file index in gesture folder
+def next_index(gesture_dir):
+    existing = [int(f.split(".")[0]) for f in os.listdir(gesture_dir) if f.endswith(".npy")]
+    return max(existing) + 1 if existing else 0
 
 def record_gestures():
     cap = cv2.VideoCapture(0)
@@ -48,8 +54,10 @@ def record_gestures():
                 frame = cv2.flip(frame, 1)
                 countdown(frame, text=f"Prepare '{gesture}'", seconds=3)
 
+            start_idx = next_index(gesture_dir)
+
             for rep in range(REPS):
-                print(f"Recording {gesture}, repetition {rep+1}/{REPS}...")
+                print(f"Recording {gesture}, repetition {start_idx + rep}/{start_idx + REPS}...")
                 frames = []
                 start_time = time.time()
 
@@ -79,8 +87,8 @@ def record_gestures():
                         cv2.destroyAllWindows()
                         return
 
-                # save repetition
-                rep_path = os.path.join(gesture_dir, f"{rep}.npy")
+                # save repetition with correct index
+                rep_path = os.path.join(gesture_dir, f"{start_idx + rep}.npy")
                 np.save(rep_path, np.array(frames))
 
     cap.release()
