@@ -6,10 +6,10 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from model import GestureLSTM
 
-DATA_DIR = "data/processed"
+DATA_DIR = "data/raw"
 MODEL_DIR = "models"
 BATCH_SIZE = 8
-EPOCHS = 50
+EPOCHS = 100
 LR = 1e-3
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -86,3 +86,11 @@ for epoch in range(EPOCHS):
 os.makedirs(MODEL_DIR, exist_ok=True)
 torch.save(model.state_dict(), os.path.join(MODEL_DIR, "classifier.pth"))
 print("Training complete. Model saved.")
+
+
+
+
+# from dataset import GestureDataset
+# dataset = GestureDataset(data_dir="data/raw")
+# print(f"Loaded {len(dataset)} sequences")
+# print(f"Shape of first sequence: {dataset[0][0].shape}")
