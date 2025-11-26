@@ -4,6 +4,7 @@
 > ♿ Accessibility-Focused AI System for Gesture Understanding  
 
 ---
+![BSL Translator Demo](photos/photo1.jpg)
 
 ## 🚀 Overview
 
