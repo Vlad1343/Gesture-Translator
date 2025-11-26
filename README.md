@@ -70,11 +70,14 @@ Webcam
 
 | Layer | Technologies |
 |------|--------------|
-| Computer Vision | OpenCV, MediaPipe Holistic |
-| Machine Learning | PyTorch, LSTM |
-| Data Processing | NumPy |
-| Runtime | Python 3.11 |
-| Deployment | Local, offline-first |
+| Computer Vision & Tracking | OpenCV, MediaPipe Holistic, DLib, OpenPose (optional) |
+| Machine Learning | PyTorch, LSTM, TorchScript for optimized inference |
+| Data Processing & Analytics | NumPy, Pandas, Scikit-learn (for preprocessing) |
+| Visualization & Feedback | Matplotlib, OpenCV overlays, Animated GUI hints |
+| Runtime & Environment | Python 3.11, Virtualenv, CUDA-enabled GPU support |
+| Deployment & Distribution | Local/offline-first, PyInstaller or Docker-ready |
+| Testing & Validation | PyTest, Unit/Integration Tests, Confusion Matrix Analysis |
+| Logging & Monitoring | TensorBoard, Custom Logging, Performance Profiling |
 
 ---
 
