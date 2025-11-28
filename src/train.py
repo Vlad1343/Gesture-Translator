@@ -1,96 +1,135 @@
 # src/train.py
+import json
 import os
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
+
+from config import DATA_DIR, MODEL_PATH, WINDOW_SIZE, WINDOW_STRIDE
 from model import GestureLSTM
 
-DATA_DIR = "data/raw"
-MODEL_DIR = "models"
-BATCH_SIZE = 8
-EPOCHS = 100
+BATCH_SIZE = 32
+EPOCHS = 80
 LR = 1e-3
+VAL_SPLIT = 0.2
+SEED = 42
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# load label map
-import json
 with open("label_map.json", "r") as f:
-    label_map = json.load(f)  # e.g., {"0":"yes","1":"no",...}
-labels = {v:int(k) for k,v in label_map.items()}  # invert mapping
+    label_map = json.load(f)
+labels = {v: int(k) for k, v in label_map.items()}
 
-# Dataset for gesture sequences
-class GestureDataset(Dataset):
-    def __init__(self, data_dir):
-        self.sequences = []
+
+class GestureWindowDataset(Dataset):
+    """Slide a fixed window over recordings so training matches inference."""
+
+    def __init__(self, data_dir, window_size, stride):
+        self.window_size = window_size
+        self.samples = []
         self.targets = []
 
         for gesture_name in os.listdir(data_dir):
             gesture_dir = os.path.join(data_dir, gesture_name)
-            if not os.path.isdir(gesture_dir):
+            label_idx = labels.get(gesture_name)
+            if label_idx is None or not os.path.isdir(gesture_dir):
                 continue
-            for file in os.listdir(gesture_dir):
-                if file.endswith(".npy"):
-                    seq = np.load(os.path.join(gesture_dir, file))
-                    self.sequences.append(seq)
-                    self.targets.append(labels[gesture_name])
 
-        self.sequences = [torch.tensor(s, dtype=torch.float32) for s in self.sequences]
+            for file in os.listdir(gesture_dir):
+                if not file.endswith(".npy"):
+                    continue
+                seq = np.load(os.path.join(gesture_dir, file))
+                if len(seq) < window_size:
+                    continue
+
+                for start in range(0, len(seq) - window_size + 1, stride):
+                    window = seq[start:start + window_size]
+                    self.samples.append(torch.tensor(window, dtype=torch.float32))
+                    self.targets.append(label_idx)
+
+        if not self.samples:
+            raise RuntimeError("No training samples were found. Record gestures first.")
+
         self.targets = torch.tensor(self.targets, dtype=torch.long)
+        self.num_features = self.samples[0].shape[1]
 
     def __len__(self):
-        return len(self.sequences)
+        return len(self.samples)
 
     def __getitem__(self, idx):
-        return self.sequences[idx], self.targets[idx]
+        return self.samples[idx], self.targets[idx]
 
-# collate_fn to pad sequences to same length
-def collate_fn(batch):
-    sequences, targets = zip(*batch)
-    lengths = [len(seq) for seq in sequences]
-    max_len = max(lengths)
-    padded = [torch.cat([seq, torch.zeros(max_len - len(seq), seq.size(1))], dim=0) for seq in sequences]
-    return torch.stack(padded), torch.tensor(targets)
 
-# Prepare dataset
-dataset = GestureDataset(DATA_DIR)
-dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_fn)
+def build_dataloaders(dataset):
+    val_len = max(1, int(len(dataset) * VAL_SPLIT))
+    train_len = len(dataset) - val_len
+    generator = torch.Generator().manual_seed(SEED)
+    train_set, val_set = random_split(dataset, [train_len, val_len], generator=generator)
 
-# Model
-input_size = dataset[0][0].shape[1]  # number of keypoints per frame
-num_classes = len(labels)
-model = GestureLSTM(input_size=input_size, num_classes=num_classes).to(DEVICE)
+    train_loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True, drop_last=False)
+    val_loader = DataLoader(val_set, batch_size=BATCH_SIZE, shuffle=False, drop_last=False)
+    return train_loader, val_loader
 
-# Loss and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
-# Training loop
-for epoch in range(EPOCHS):
-    model.train()
-    total_loss = 0
-    for batch_x, batch_y in dataloader:
+def run_epoch(loader, model, criterion, optimizer=None):
+    is_training = optimizer is not None
+    model.train(mode=is_training)
+    total_loss = 0.0
+    total_correct = 0
+    total_examples = 0
+
+    for batch_x, batch_y in loader:
         batch_x = batch_x.to(DEVICE)
         batch_y = batch_y.to(DEVICE)
 
-        optimizer.zero_grad()
+        if is_training:
+            optimizer.zero_grad()
+
         outputs = model(batch_x)
         loss = criterion(outputs, batch_y)
-        loss.backward()
-        optimizer.step()
+
+        if is_training:
+            loss.backward()
+            optimizer.step()
+
+        preds = torch.argmax(outputs, dim=1)
+        total_correct += (preds == batch_y).sum().item()
+        total_examples += batch_y.size(0)
         total_loss += loss.item()
 
-    print(f"Epoch [{epoch+1}/{EPOCHS}], Loss: {total_loss/len(dataloader):.4f}")
-
-# Save model
-os.makedirs(MODEL_DIR, exist_ok=True)
-torch.save(model.state_dict(), os.path.join(MODEL_DIR, "classifier.pth"))
-print("Training complete. Model saved.")
+    avg_loss = total_loss / max(1, len(loader))
+    accuracy = total_correct / max(1, total_examples)
+    return avg_loss, accuracy
 
 
+def main():
+    dataset = GestureWindowDataset(DATA_DIR, WINDOW_SIZE, WINDOW_STRIDE)
+    train_loader, val_loader = build_dataloaders(dataset)
+
+    input_size = dataset.num_features
+    num_classes = len(labels)
+    model = GestureLSTM(input_size=input_size, num_classes=num_classes).to(DEVICE)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+
+    best_val_acc = 0.0
+    for epoch in range(1, EPOCHS + 1):
+        train_loss, train_acc = run_epoch(train_loader, model, criterion, optimizer)
+        val_loss, val_acc = run_epoch(val_loader, model, criterion)
+        print(
+            f"Epoch {epoch:03d}/{EPOCHS} "
+            f"| train loss {train_loss:.4f}, acc {train_acc:.3f} "
+            f"| val loss {val_loss:.4f}, acc {val_acc:.3f}"
+        )
+
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
+            torch.save(model.state_dict(), MODEL_PATH)
+
+    print(f"Training complete. Best val acc: {best_val_acc:.3f}. Model saved to {MODEL_PATH}.")
 
 
-# from dataset import GestureDataset
-# dataset = GestureDataset(data_dir="data/raw")
-# print(f"Loaded {len(dataset)} sequences")
-# print(f"Shape of first sequence: {dataset[0][0].shape}")
+if __name__ == "__main__":
+    main()
