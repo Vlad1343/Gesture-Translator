@@ -25,8 +25,8 @@ TRIM_TAIL = 4
 
 # Optional manual overrides so you can tweak behavior without CLI args.
 # Example: MANUAL_GESTURES = ["hello"]; MANUAL_REPS = 10
-MANUAL_GESTURES = ['please-thank_you']
-MANUAL_REPS = 55
+MANUAL_GESTURES = ['good-afternoon']
+MANUAL_REPS = 15
 
 
 def ensure_dir(path):

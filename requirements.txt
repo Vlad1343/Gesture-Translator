@@ -1,19 +1,27 @@
-# core
-numpy==1.24.3
-opencv-python==4.7.0.72
-mediapipe==0.10.21
-imageio==2.37.0
-imageio-ffmpeg==0.4.8
+# core (looser pins to support Python 3.12 / arm64 wheels)
+numpy>=2.2.0
+opencv-python>=4.12.0.88
+mediapipe>=0.10.14
+imageio>=2.37.0
+imageio-ffmpeg>=0.4.8
 
 # ML
-torch==2.1.1
-torchvision==0.16.1
-scikit-learn==1.2.2
+torch>=2.9.0
+torchvision>=0.19.0
+scikit-learn>=1.4.0
 
 # dev / helpers
-matplotlib==3.7.2
-tqdm==4.67.1
-pandas==2.2.2
+matplotlib>=3.8.0
+tqdm>=4.67.0
+pandas>=2.2.0
 
 # optional TTS / later (ElevenLabs)
-elevenlabs==0.2.1
+elevenlabs>=0.2.1
+
+# web
+Flask>=3.0.3
+
+# utilities
+requests>=2.31.0
+python-dotenv>=1.0.0
+

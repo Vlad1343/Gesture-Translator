@@ -10,7 +10,7 @@ from config import DATA_DIR, MODEL_PATH, WINDOW_SIZE, WINDOW_STRIDE
 from model import GestureLSTM
 
 BATCH_SIZE = 32
-EPOCHS = 80
+EPOCHS = 45
 LR = 1e-3
 VAL_SPLIT = 0.2
 SEED = 42
