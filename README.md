@@ -5,7 +5,7 @@
 > ♿ Accessibility-Focused AI System for Gesture Understanding
 
 ---
-![BSL Translator Demo](photos/photo6.png)
+![BSL Translator Demo](photos/photo7.png)
 
 ## 🚀 Overview
 
@@ -168,4 +168,3 @@ This project demonstrates proficiency in **computer vision pipelines**, **tempor
 ---
 
 **British Sign Language Translator** demonstrates how modern computer vision and deep learning can be combined into a **real-time, accessible, and impactful AI application**, transforming human motion into language with speed, precision, and purpose.
-
