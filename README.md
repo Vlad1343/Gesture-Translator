@@ -1,6 +1,6 @@
 # British Sign Language Translator
 
-> **🥇 1st Place** at the **Accelerate ME x Housr** — **Elevenlabs Challenge** <br>
+> **🥇 1st Place at the Accelerate ME x Housr — Elevenlabs Challenge** <br>
 > 🤟 Real-Time Computer Vision & Sequence Learning Project <br>
 > ♿ Accessibility-Focused AI System for Gesture Understanding
 
@@ -9,9 +9,9 @@
 
 ## 🚀 Overview
 
-**British Sign Language Translator** is a real-time, AI-powered computer vision system that translates **British Sign Language (BSL) gestures into plain English text** using webcam input. The system captures human motion via MediaPipe, extracts spatiotemporal keypoints from hands, face, and upper body, and performs sequence-based gesture classification using a deep learning model trained on recorded sign sequences.
+**British Sign Language Translator** is a real-time, AI-powered system that translates **BSL gestures into English text and speech**. Using a webcam, the system captures human motion via MediaPipe, extracts spatiotemporal keypoints, and performs sequence-based classification using a deep learning model.
 
-The project now ships with a **Flask streaming backend**, a **Vite/React frontend**, and an **ElevenLabs-powered voice layer** so gestures are captured, classified, displayed, and spoken through a single cohesive experience. Designed with **accessibility, low latency, and modularity** in mind, the stack runs locally, responds instantly, and helps bridge communication gaps between signers and non-signers.
+The project features a **Flask backend**, a **React frontend**, and an **ElevenLabs-powered voice layer**. Designed for accessibility and low latency, the system runs locally to bridge communication gaps between signers and non-signers instantly.
 
 ---
 
@@ -19,73 +19,44 @@ The project now ships with a **Flask streaming backend**, a **Vite/React fronten
 
 ## 💡 Core Features
 
-### 🤲 Real-Time Gesture Recognition
+### 🤲 Real-Time Recognition & Tracking
 
 - Live webcam capture using **OpenCV** with frame-by-frame landmark tracking.
 - MediaPipe **Holistic** model tracks hands, face, and upper body simultaneously.
-- Robust to natural motion variation and differences in signing speed.
+- Robust handling of natural motion variations and signing speeds.
 
-### 🧠 Temporal Gesture Understanding
+### 🧠 Temporal Deep Learning
 
-- Gestures represented as **time-based sequences of keypoints**, preserving motion dynamics.
-- Fixed-length temporal windows enable consistent training and inference.
-- Sliding window inference allows continuous recognition without manual segmentation.
+- **LSTM-based neural network** trained on sequential keypoint data to learn motion dynamics.
+- Sliding window inference enables continuous recognition without manual segmentation.
+- Probabilistic predictions mapped directly to English labels.
 
-### 🧮 Deep Learning Classifier
+### 🌐 Streaming & Feedback
 
-- **LSTM-based neural network** trained on sequential keypoint data.
-- Learns temporal dependencies unique to each sign.
-- Outputs probabilistic predictions mapped directly to plain-English labels.
+- **Flask Streaming Backend:** Delivers an MJPEG feed with landmark overlays and model output.
+- **React Frontend:** High-performance UI built with Vite and animated via Framer Motion.
+- **Low Latency:** On-device inference ensures privacy and instant feedback.
 
-### 🖥️ Instant Feedback Loop
+### 🔊 ElevenLabs Voice Integration
 
-- As soon as a gesture is recognized with sufficient confidence, it is printed to the terminal.
-- Low-latency, on-device inference without reliance on cloud services.
-- Designed for real-time experimentation and live demonstrations.
-
-### ♿ Accessibility-Oriented Design
-
-- Camera-only interaction — no gloves, trackers, or external sensors required.
-- Runs fully locally for privacy, reliability, and offline use.
-- Simple workflow for extending the vocabulary with new gestures.
-
-### 🌐 Streaming Backend Services
-
-- Serve the production Vite build and MJPEG assets directly from **Flask**, simplifying deployment.
-- Stream the webcam feed as a multipart MJPEG response that includes landmark overlays and model output.
-- Gate predictions through **deque-based buffers** so the stop action can instantly flush state and pause inference.
-
-### 🎨 Immersive Frontend Experience
-
-- Animate every section with **Framer Motion**, scroll-linked parallax, and magnetic stat cards built in React.
-- Trigger live inference from the UI, which requests the streaming feed with a cache-busting timestamp and halts it through the stop control.
-- Present the product story with Tailwind CSS, Lucide icons, and Bento-style layouts that emphasize accessibility metrics.
-
-### 🔊 ElevenLabs Voice Output
-
-- Convert confirmed gestures to speech through a background **ElevenLabs** worker that keeps the CV loop non-blocking.
-- Enforce configurable cooldowns and gesture whitelists so announcements stay relevant and non-repetitive.
-- Cache synthesized MP3 snippets, reuse them when gestures repeat, and auto-play them via lightweight system players or PyDub.
+- **Speech Synthesis:** Confirmed gestures are converted to speech via ElevenLabs.
+- **Smart Caching:** Reuses synthesized audio snippets to minimize API calls and latency.
+- **Non-blocking Pipeline:** Background workers handle audio so the CV loop remains fluid.
 
 ---
 
 ## 🏗️ System Architecture
 
-Vite/React Frontend (Live MJPEG viewer + controls)  
-→ Flask Streaming Backend (live stream + inference control)  
-→ MediaPipe Holistic  
-→ Keypoint Extraction (Hands + Pose, privacy-filtered face landmarks)  
-→ Temporal Sequence Buffer  
-→ LSTM Gesture Classifier  
-→ Text Overlay + ElevenLabs Voice Output
+1. **React Frontend** (UI & Controls)
+2. **Flask Backend** (Stream & Inference)
+3. **MediaPipe Holistic** (Landmark Extraction)
+4. **LSTM Classifier** (Temporal Pattern Recognition)
+5. **ElevenLabs API** (Voice Output)
 
-- **Frontend:** Hosts the immersive UI, launches the live feed, and signals the backend to end a session.  
-- **Flask Backend:** Boots the camera loop, streams MJPEG frames, and protects inference with stop events and buffers.  
-- **MediaPipe Holistic:** Detects 3D landmarks for hands, face, and upper body.  
-- **Keypoint Extraction:** Normalizes pose-relative coordinates, removes facial data, and flattens keypoints.  
-- **Temporal Sequence Buffer:** Maintains recent frames to provide temporal context for classification.  
-- **LSTM Gesture Classifier:** Learns motion patterns and predicts gestures.  
-- **Voice + Text Output:** Displays recognized gestures in real time, then plays the ElevenLabs announcement.  
+- **Frontend:** Interactive dashboard for live feed control and accessibility metrics.
+- **Backend:** Manages the camera loop, MJPEG streaming, and inference state.
+- **CV Layer:** Normalizes 3D coordinates and flattens keypoints for model consumption.
+- **ML Layer:** Processes temporal sequences to predict gestures with high confidence.
 
 ---
 
@@ -93,78 +64,37 @@ Vite/React Frontend (Live MJPEG viewer + controls)
 
 | Layer | Technologies |
 |------|--------------|
-| Frontend Experience | React 18, Vite, Tailwind CSS, Framer Motion, Lucide Icons |
-| Streaming Backend & APIs | Flask, Werkzeug, threading.Event buffers, MJPEG streaming, Jinja templates |
-| Computer Vision & Tracking | OpenCV, MediaPipe Holistic, custom keypoint extraction/visualization |
-| Machine Learning | PyTorch, GestureLSTM (stacked LSTMs), TorchScript-ready export |
-| Data Tooling | NumPy, Pandas, Scikit-learn, sliding-window dataset builders |
-| Voice & Audio | ElevenLabs API, Requests, PyDub, afplay/ffplay/mpg123 fallbacks, cached MP3 playback |
-| Runtime & Environment | Python 3.11, Virtualenv, CUDA-enabled GPU support, python-dotenv |
-| Deployment & Distribution | Local/offline-first, Vite build artifacts, Flask app server, Docker-ready |
-| Testing & Validation | PyTest, integration smoke tests, confusion-matrix evaluation & TensorBoard logging |
+| Frontend | React, Vite, Tailwind CSS, Framer Motion, Lucide Icons |
+| Backend | Flask, Werkzeug, MJPEG Streaming, Jinja |
+| Computer Vision | OpenCV, MediaPipe Holistic |
+| Machine Learning | PyTorch, LSTM, TorchScript, NumPy, Pandas, Scikit-learn |
+| Voice & Audio | ElevenLabs API, PyDub, Requests |
+| Runtime | Python, CUDA, Virtualenv, Docker, Dotenv |
 
 ---
 
-## 🛠️ Backend Services & APIs
+## 🛠️ Backend & Voice Pipeline
 
-- Serve the compiled Vite frontend, assets, and templates straight from the build output, so `Flask` doubles as both API and web host.
-- Stream the MJPEG output, draw landmarks through the computer vision utility layer, and run inference inside a controllable generator loop.
-- Expose a stop action that sets a `threading.Event`, clearing buffers and shutting down capture threads without restarting the server.
-- Load Torch models once at boot, pin them to CUDA when available, and reuse prediction/prediction-stability buffers between requests.
-
-## 🎨 Frontend Experience (Vite + React)
-
-- Compose a single-page experience with Framer Motion, scroll-linked transforms, and magnetic stat cards.
-- Launch and stop the live stream directly from the UI, swapping hero media for the MJPEG output on demand.
-- Spotlight accessibility metrics, industries, and personas through Tailwind-powered layouts, Lucide icons, and animated gradients.
-- Bundle everything with Vite for ultra-fast local development, then serve the optimized build via the backend.
-
-![BSL Translator Demo](photos/photo5.png)
-
-## 🔊 ElevenLabs Voice Pipeline
-
-- Configure API keys, model IDs, cooldowns, and gesture-to-text mappings via environment variables or a dedicated voice config module (dotenv supported).
-- Enqueue gestures through `speak_gesture`, which drops duplicates within the repeat cooldown and keeps inference threads unblocked.
-- Cache MP3 bytes with an `OrderedDict`, reuse clips for common signs, and fall back to PyDub if native players are missing.
-- Guard against noisy inputs by allowing only whitelisted gestures to speak and by enforcing announcement cooldowns between calls.
-
-![BSL Translator Demo](photos/photo3.png)
+- **API Integration:** Flask serves the optimized React build and handles live inference requests.
+- **State Management:** Inference buffers are managed via internal events to allow instant pausing and flushing of the gesture state.
+- **Audio Logic:** The voice module enforces configurable cooldowns and whitelists to ensure announcements stay relevant and non-repetitive.
+- **Performance:** Torch models are pinned to CUDA when available for accelerated real-time prediction.
 
 ---
 
 ## 🧠 Why This Project Stands Out
 
-✅ End-to-end ML system covering **data capture, training, streaming, and real-time inference**  
-✅ Sequence-based learning instead of static pose classification  
-✅ Multi-landmark fusion using hands, face, and body keypoints  
-✅ Accessibility-driven application with clear real-world relevance  
-✅ Clean, modular architecture spanning **React frontend, Flask backend, and ElevenLabs voice**  
-
-This project demonstrates proficiency in **computer vision pipelines**, **temporal deep learning models**, and **practical AI system design**.
-
-![BSL Translator Demo](photos/photo4.png)
-
----
-
-## 🔮 Future Enhancements
-
-- Compose sentence-level translations with automatic gesture segmentation.  
-- Inject temporal attention or transformer blocks to boost classification accuracy.  
-- Ship a lightweight WebRTC mode so remote browsers can subscribe to the live feed without MJPEG polling.  
-- Deploy optimized models to edge devices (Jetson, iOS) for untethered experiences.  
-- Personalize ElevenLabs voices per venue and expose UI controls for selecting tone and language.  
+✅ End-to-End ML: Covers data capture, training, streaming, and real-time inference.  
+✅ Sequence Learning: Utilizes temporal motion patterns rather than static poses.  
+✅ Multi-Landmark Fusion: Combines hands, face, and body data for higher accuracy.  
+✅ Accessibility First: A camera-only solution requiring no expensive sensors or gloves.  
 
 ---
 
 ## 🎯 Example Use Case
 
-1. User stands in front of a webcam.  
-2. Performs a BSL gesture (e.g. *“yes”*).  
-3. System captures motion across multiple frames.  
-4. Flask streams frames to the React UI while the model classifies the gesture in real time.  
-5. The recognized word is displayed instantly in English and queued for ElevenLabs playback.  
-6. The voice layer announces the phrase so nearby listeners hear it immediately.
+1. **Capture:** User performs a BSL gesture (e.g., "Yes") in front of a webcam.  
+2. **Process:** Flask streams the frames while the LSTM model analyzes the motion sequence.  
+3. **Display:** The recognized word appears instantly on the React dashboard.  
+4. **Speak:** ElevenLabs generates or plays the corresponding audio for immediate verbal communication.
 
----
-
-**British Sign Language Translator** demonstrates how modern computer vision and deep learning can be combined into a **real-time, accessible, and impactful AI application**, transforming human motion into language with speed, precision, and purpose.
