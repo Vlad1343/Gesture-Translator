@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gesture Demo</title>
+    <style>
+      body { margin: 0; padding: 24px; font-family: sans-serif; background: #fff; }
+      button { padding: 12px 20px; font-size: 16px; cursor: pointer; }
+      #viewer { display: none; margin-top: 16px; max-width: 100%; }
+    </style>
+  </head>
+  <body>
+    <button id="start">Start</button>
+    <div>
+      <img id="viewer" alt="Gesture feed will appear here" />
+    </div>
+    <script>
+      const btn = document.getElementById('start');
+      const viewer = document.getElementById('viewer');
+
+      btn.addEventListener('click', () => {
+        viewer.src = '/video_feed';
+        viewer.style.display = 'block';
+        btn.disabled = true;
+        btn.textContent = 'Running...';
+      });
+    </script>
+  </body>
+</html>

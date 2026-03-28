@@ -1,0 +1,19 @@
+# from project root
+python3.11 -m venv .venv
+source .venv/bin/activate
+
+brew install python@3.11
+python -m pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+
+git commit -m "Change camera visuals" --date="2025-11-25 18:45:45"
+
+env MPLCONFIGDIR=/tmp/mpl PORT=5001 python web_app.py
+
+
+cd frontend
+npm install
+
+Start the dev server:
+npm run dev
+npm run build

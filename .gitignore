@@ -1,5 +1,24 @@
-other.txt
-run.sh
-models/
-data/
-src/
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Environments
+.env
+.venv/
+env/
+venv/
+
+# OS / tooling noise
+.DS_Store
+node_modules/
+
+# Python packaging / build
+build/
+dist/
+*.egg-info/
+
+# IDEs
+.idea/
+.vscode/
+
+venv310/
